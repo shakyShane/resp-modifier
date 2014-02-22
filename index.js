@@ -31,13 +31,12 @@ module.exports = function (opt) {
         if (!body) {
             return false;
         }
-        return (~body.lastIndexOf("/livereload.js"));
     }
 
     function snap(body) {
 
         var _body = body;
-        rules.map(function(rule) {
+        rules.forEach(function(rule) {
             if (rule.match.test(body)) {
                 _body = _body.replace(rule.match, function(w) {
                     return rule.fn(w);
