@@ -27,9 +27,7 @@
   "scripts": {
     "test": "mocha"
   },
-  "dependencies": {
-    "lodash": "~2.2.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "~3.5.2",
     "gulp-mocha": "~0.4.1",
