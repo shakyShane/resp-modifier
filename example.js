@@ -1,15 +1,18 @@
-var watcher = require("./index");
+var connect = require("connect");
+var respMod = require("./index.js");
+var http = require("http");
 
-var items = [];
+var app = connect()
+    .use(respMod({
+        rules: [
+            {
+                match: /<head[^>]*>/,
+                fn: function (w) {
+                    return w + "Your string";
+                }
+            }
+        ]
+    }))
+    .use(connect.static(filePath.resolve("./")));
 
-watcher.watchRegistry(items, 1000).on("item:add", function (item) {
-    console.log("ADDED");
-}).on("item:removed" ,function () {
-    console.log("REMOVED");
-}).on("item:updated", function () {
-    console.log("UPDATED");
-});
-
-setInterval(function () {
-    watcher.addItem(items, {id: 123});
-}, 900);
+var server = http.createServer(app).listen(8000);

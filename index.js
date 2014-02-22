@@ -71,7 +71,7 @@ module.exports = function (opt) {
     }
 
     // middleware
-    return function livereload(req, res, next) {
+    return function (req, res, next) {
         if (res._livereload) {
             return next();
         }
