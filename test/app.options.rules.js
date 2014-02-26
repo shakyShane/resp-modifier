@@ -27,6 +27,12 @@ app.configure("development", function () {
             {
                 match: /<\/head>/,
                 fn: pfluume
+            },
+            {
+                match: new RegExp("0.0.0.0:8000", "g"),
+                fn: function () {
+                    return "19.16.565.67:3002"
+                }
             }
         ]
     }));
@@ -50,6 +56,15 @@ app.get("/head", function (req, res) {
 
 app.get("/default", function (req, res) {
     var html = "<html><title>plain html</title></html>";
+    res.send(html);
+});
+
+app.get("/url", function (req, res) {
+    var html = fs.readFileSync(__dirname + "/fixtures/static.html", "UTF-8");
+    res.send(html);
+});
+app.get("/url-large", function (req, res) {
+    var html = fs.readFileSync(__dirname + "/fixtures/large-file.html", "UTF-8");
     res.send(html);
 });
 
@@ -107,6 +122,37 @@ describe("Rules: ", function () {
                 .end(function (err, res) {
                     assert.equal(res.text.indexOf("pfluume"), -1);
                     assert.equal(res.text.indexOf("buume"), -1);
+                    if (err) {
+                        return done(err);
+                    }
+                    done();
+                });
+        });
+    });
+    describe("GET /url", function () {
+        it("can re-write links", function (done) {
+            request(app)
+                .get("/url")
+                .set("Accept", "text/html")
+                .expect(200)
+                .end(function (err, res) {
+                    assert.equal(res.text.indexOf("0.0.0.0:8000"), -1);
+                    assert.equal(true, res.text.indexOf("19.16.565.67:3002") >= 0);
+                    if (err) {
+                        return done(err);
+                    }
+                    done();
+                });
+        });
+    });
+    describe("GET /url-large", function () {
+        it("can re-write links", function (done) {
+            request(app)
+                .get("/url-large")
+                .set("Accept", "text/html")
+                .expect(200)
+                .end(function (err, res) {
+                    assert.equal(true, res.text.indexOf("</html>") >= 0);
                     if (err) {
                         return done(err);
                     }

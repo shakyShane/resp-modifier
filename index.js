@@ -103,7 +103,7 @@ module.exports = function (opt) {
                     res.push(newString);
                     return true;
                 } else if (html(body) || html(res.data)) {
-                    res.push("body");
+                    res.push(body);
                     return true;
                 } else {
                     restore();
