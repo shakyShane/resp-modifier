@@ -136,7 +136,7 @@ describe("Rules: ", function () {
                 .set("Accept", "text/html")
                 .expect(200)
                 .end(function (err, res) {
-                    assert.equal(res.text.indexOf("0.0.0.0:8000"), -1);
+                    assert.equal(true, res.text.indexOf("0.0.0.0:8000") < 0);
                     assert.equal(true, res.text.indexOf("19.16.565.67:3002") >= 0);
                     if (err) {
                         return done(err);
@@ -153,9 +153,6 @@ describe("Rules: ", function () {
                 .expect(200)
                 .end(function (err, res) {
                     assert.equal(true, res.text.indexOf("</html>") >= 0);
-                    if (err) {
-                        return done(err);
-                    }
                     done();
                 });
         });
