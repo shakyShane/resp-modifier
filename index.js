@@ -85,6 +85,8 @@ module.exports = function (opt) {
             return next();
         }
 
+        req.headers['accept-encoding'] = 'identity';
+
         function restore() {
             res.writeHead = writeHead;
             res.write = write;
