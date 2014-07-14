@@ -1,7 +1,23 @@
 module.exports = function (opt) {
     // options
     opt = opt || {};
-    var ignore = opt.ignore || opt.excludeList || [".js", ".css", ".svg", ".ico", ".woff", ".png", ".jpg", ".jpeg"];
+    var defaultIgnoreTypes = [
+            // text files
+            "js", "json", "css",
+            // image files
+            "png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
+            // vector & font
+            "svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
+            // audio
+            "mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
+            // video & other media
+            "mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
+            // document files
+            "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
+            // data files
+            "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
+        ].map(function(ext) { return '.' + ext; });
+    var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
     var html = opt.html || _html;
     var rules = opt.rules || [];
 
@@ -17,7 +33,11 @@ module.exports = function (opt) {
         if (!str) {
             return false;
         }
-        return /<[:_-\w\s\!\/\=\"\']+>/i.test(str);
+        // Test to see if start of file contents matches:
+        // - Optional byte-order mark (BOM)
+        // - Zero or more spaces
+        // - Any sort of valid HTML tag or doctype tag (basically, <...>)
+        return /^(\uFEFF|\uFFFE)?\s*<[:_\-\w\s\!\/\=\"\']+>/i.test(str);
     }
 
     function exists(body) {
@@ -100,12 +120,13 @@ module.exports = function (opt) {
         res.inject = res.write = function(string, encoding) {
             if (string !== undefined) {
                 var body = string instanceof Buffer ? string.toString(encoding) : string;
-                if (exists(body) && !snip(res.data)) {
-                    var newString = snap(body);
-                    res.push(newString);
-                    return true;
-                } else if (html(body) || html(res.data)) {
-                    res.push(body);
+                if (html(body) || html(res.data)) {
+                    if (exists(body) && !snip(res.data)) {
+                        var newString = snap(body);
+                        res.push(newString);
+                    } else {
+                        res.push(body);
+                    }
                     return true;
                 } else {
                     restore();
