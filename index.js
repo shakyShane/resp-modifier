@@ -37,7 +37,7 @@ module.exports = function (opt) {
         // - Optional byte-order mark (BOM)
         // - Zero or more spaces
         // - Any sort of valid HTML tag or doctype tag (basically, <...>)
-        return /^(\uFEFF|\uFFFE)?\s*<[:_\-\w\s\!\/\=\"\']+>/i.test(str);
+        return /^(\uFEFF|\uFFFE)?\s*<[:_\-\w\s\!\/\=\"\'.]+>/i.test(str);
     }
 
     function exists(body) {
