@@ -8,9 +8,7 @@ app.use(express.methodOverride());
 app.configure("development", function () {
     // live reload script
     var livereload = require("../index.js");
-    app.use(livereload({
-        port: 35729
-    }));
+    app.use(livereload());
 });
 
 // load static content before routing takes place

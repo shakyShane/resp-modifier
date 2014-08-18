@@ -51,13 +51,13 @@ notModified.forEach(function(file) {
                 .set("Accept", "text/html")
                 .expect(200)
                 .parse(function binaryParser(res, callback) {
-                    res.setEncoding('binary');
-                    res.data = '';
-                    res.on('data', function (chunk) {
+                    res.setEncoding("binary");
+                    res.data = "";
+                    res.on("data", function (chunk) {
                         res.data += chunk;
                     });
-                    res.on('end', function () {
-                        callback(null, new Buffer(res.data, 'binary'));
+                    res.on("end", function () {
+                        callback(null, new Buffer(res.data, "binary"));
                     });
                 })
                 .end(function (err, res) {

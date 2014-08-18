@@ -16,7 +16,7 @@ module.exports = function (opt) {
             "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
             // data files
             "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
-        ].map(function(ext) { return '.' + ext; });
+        ].map(function(ext) { return "." + ext; });
     var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
     var html = opt.html || _html;
     var rules = opt.rules || [];
@@ -105,7 +105,7 @@ module.exports = function (opt) {
             return next();
         }
 
-        req.headers['accept-encoding'] = 'identity';
+        req.headers["accept-encoding"] = "identity";
 
         function restore() {
             res.writeHead = writeHead;

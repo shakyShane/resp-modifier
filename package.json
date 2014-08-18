@@ -25,11 +25,11 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "gulp lint && mocha"
   },
   "dependencies": {},
   "devDependencies": {
-    "gulp": "~3.5.2",
+    "gulp": "^3.8.7",
     "gulp-mocha": "~0.4.1",
     "gulp-jshint": "~1.4.0",
     "express": "~3.2.2",

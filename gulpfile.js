@@ -6,11 +6,7 @@ gulp.task('lint', function () {
     gulp.src(['test/*.js', 'index.js'])
         .pipe(jshint('test/.jshintrc'))
         .pipe(jshint.reporter('default'))
-});
-
-gulp.task('test', function () {
-    gulp.src('test/*.js')
-        .pipe(mocha({reporter: 'nyan'}));
+        .pipe(jshint.reporter('fail'));
 });
 
 gulp.task('default', ['lint', 'test']);

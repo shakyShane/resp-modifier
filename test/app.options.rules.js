@@ -31,7 +31,7 @@ app.configure("development", function () {
             {
                 match: new RegExp("0.0.0.0:8000", "g"),
                 fn: function () {
-                    return "19.16.565.67:3002"
+                    return "19.16.565.67:3002";
                 }
             }
         ]
