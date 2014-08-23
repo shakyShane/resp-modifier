@@ -41,7 +41,6 @@ if (!module.parent) {
 
 // run the tests
 var request = require("supertest");
-var assert = require("assert");
 
 describe("GET /redirect_to_favicon", function () {
     it("respond with Location header", function (done) {
