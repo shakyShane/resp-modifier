@@ -23,7 +23,6 @@ app.configure("development", function () {
     }));
 
     // live reload script
-    var livereload2 = require("../index.js");
     app.use(livereload({
         port: 35731,
         ignore: [".hammel"]

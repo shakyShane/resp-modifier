@@ -10,11 +10,11 @@ app.configure("development", function () {
     // live reload script
     var livereload = require("../index.js");
 
-    function buume(w, s) {
+    function buume(w) {
         return "\n\n joggeli buume \n\n" + w;
     }
 
-    function pfluume(w, s) {
+    function pfluume(w) {
         return "\n\n het gern pfluume \n\n" + w;
     }
 
