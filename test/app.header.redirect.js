@@ -8,9 +8,7 @@ app.use(express.methodOverride());
 app.configure("development", function () {
     // live reload script
     var livereload = require("../index.js");
-    app.use(livereload({
-        port: 35729
-    }));
+    app.use(livereload());
 });
 
 // load static content before routing takes place
@@ -43,7 +41,6 @@ if (!module.parent) {
 
 // run the tests
 var request = require("supertest");
-var assert = require("assert");
 
 describe("GET /redirect_to_favicon", function () {
     it("respond with Location header", function (done) {

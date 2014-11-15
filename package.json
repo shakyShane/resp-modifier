@@ -21,22 +21,26 @@
     }
   ],
   "main": "index.js",
+  "files": [
+    "index.js",
+    "LICENSE-MIT"
+  ],
   "engines": {
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "gulp lint && mocha"
   },
   "dependencies": {
     "minimatch": "^1.0.0"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
     "express": "~3.2.2",
-    "gulp": "~3.5.2",
-    "gulp-jshint": "~1.4.0",
-    "gulp-mocha": "~0.4.1",
-    "multiline": "^1.0.1",
+    "gulp": "^3.8.7",
+    "gulp-jshint": "~1.8.4",
+    "mocha": "^1.21.4",
+    "supertest": "~0.13.0"
+    "chai": "^1.10.0",
     "supertest": "~0.6.0"
   },
   "keywords": []

@@ -10,11 +10,11 @@ app.configure("development", function () {
     // live reload script
     var livereload = require("../index.js");
 
-    function buume(w, s) {
+    function buume(w) {
         return "\n\n joggeli buume \n\n" + w;
     }
 
-    function pfluume(w, s) {
+    function pfluume(w) {
         return "\n\n het gern pfluume \n\n" + w;
     }
 
@@ -31,7 +31,7 @@ app.configure("development", function () {
             {
                 match: new RegExp("0.0.0.0:8000", "g"),
                 fn: function () {
-                    return "19.16.565.67:3002"
+                    return "19.16.565.67:3002";
                 }
             }
         ]

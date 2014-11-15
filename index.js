@@ -46,8 +46,8 @@ module.exports = function (opt) {
         // Test to see if start of file contents matches:
         // - Optional byte-order mark (BOM)
         // - Zero or more spaces
-        // - Any sort of valid HTML tag or doctype tag (basically, <...>)
-        return /^(\uFEFF|\uFFFE)?\s*<[:_\-\w\s\!\/\=\"\'.]+>/i.test(str);
+        // - Any sort of HTML tag, comment, or doctype tag (basically, <...>)
+        return /^(\uFEFF|\uFFFE)?\s*<[^>]+>/i.test(str);
     }
 
     function exists(body) {
@@ -132,7 +132,7 @@ module.exports = function (opt) {
             return next();
         }
 
-        req.headers['accept-encoding'] = 'identity';
+        req.headers["accept-encoding"] = "identity";
 
         function restore() {
             res.writeHead = writeHead;
