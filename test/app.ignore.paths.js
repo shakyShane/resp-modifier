@@ -1,12 +1,10 @@
+var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var app = express();
 
 // run the tests
 var request = require("supertest");
-
-app.use(express.bodyParser());
-app.use(express.methodOverride());
 
 var livereload = require("../index.js");
 
@@ -23,8 +21,26 @@ app.use(livereload({
     ignorePaths: ["templates/*.html"]
 }));
 
+var output = multiline(function () {/*
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    IGNORE
+</body>
+</html>
+*/});
 app.get("/templates/ignore-path.html", function (req, res) {
-    res.end("<!doctype html>\n<html lang=\"en-US\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    IGNORE\n</body>\n</html>");
+    res.end(output);
+});
+app.get("/", function (req, res) {
+    res.end(output);
+});
+app.get("/shane", function (req, res) {
+    res.end(output);
 });
 
 // start the server
@@ -35,6 +51,27 @@ if (!module.parent) {
 }
 
 describe("GET /templates/ignore-path.html", function () {
+    it("Always allows indexs ", function (done) {
+        request(app)
+            .get("/")
+            .set("Accept", "text/html")
+            .expect(200)
+            .end(function (err, res) {
+                console.log(res.text);
+                assert.include(res.text, "TEST");
+                done();
+            });
+    });
+    it("Always allows nested indexs ", function (done) {
+        request(app)
+            .get("/shane")
+            .set("Accept", "text/html")
+            .expect(200)
+            .end(function (err, res) {
+                assert.include(res.text, "TEST");
+                done();
+            });
+    });
     it("respond with inserted script", function (done) {
         request(app)
             .get("/templates/ignore-path.html")

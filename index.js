@@ -88,9 +88,11 @@ module.exports = function (opt) {
 
     function check(url) {
 
-        url = url.replace(/^\//, "");
+        if (url.length === 1 && url === "/") {
+            return false;
+        }
 
-        var ignored = false;
+        url = url.replace(/^\//, "");
 
         if (!url) {
             return true;
@@ -112,9 +114,13 @@ module.exports = function (opt) {
         }
 
         // Finally, check any mini-match patterns for paths that have been excluded
-        return ignorePaths.some(function (pattern) {
+        if (ignorePaths.some(function (pattern) {
             return minimatch(url, pattern);
-        });
+        })) {
+            return true;
+        }
+
+        return false;
     }
 
     // middleware

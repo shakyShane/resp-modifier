@@ -37,6 +37,9 @@ var output = multiline(function () {/*
 </html>
 */});
 
+app.get("/", function (req, res) {
+    res.end(output);
+});
 app.get("/app/index.html", function (req, res) {
     res.end(output);
 });
