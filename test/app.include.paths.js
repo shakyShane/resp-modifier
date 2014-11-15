@@ -35,7 +35,7 @@ var output = multiline(function () {/*
     INCLUDE
 </body>
 </html>
-*/})
+*/});
 
 app.get("/app/index.html", function (req, res) {
     res.end(output);

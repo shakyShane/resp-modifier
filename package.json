@@ -1,7 +1,7 @@
 {
   "name": "resp-modifier",
   "description": "Middleware for modifying a HTML response",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "homepage": "https://github.com/shakyshane/resp-modifier",
   "author": {
     "name": "Shane Osbourne",
@@ -39,7 +39,7 @@
     "gulp": "^3.8.7",
     "gulp-jshint": "~1.8.4",
     "mocha": "^1.21.4",
-    "supertest": "~0.13.0"
+    "supertest": "~0.13.0",
     "chai": "^1.10.0",
     "supertest": "~0.6.0"
   },

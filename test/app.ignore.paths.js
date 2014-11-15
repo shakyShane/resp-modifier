@@ -24,7 +24,7 @@ app.use(livereload({
 }));
 
 app.get("/templates/ignore-path.html", function (req, res) {
-    res.end("<!doctype html>\n<html lang=\"en-US\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    IGNORE\n</body>\n</html>")
+    res.end("<!doctype html>\n<html lang=\"en-US\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    IGNORE\n</body>\n</html>");
 });
 
 // start the server

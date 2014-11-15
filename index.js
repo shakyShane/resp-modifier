@@ -18,7 +18,7 @@ module.exports = function (opt) {
             "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
             // data files
             "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
-        ].map(function(ext) { return '\\.' + ext  + '(\\?.*)?$' });
+        ].map(function(ext) { return "\\." + ext  + "(\\?.*)?$"; });
     var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
     var ignorePaths = opt.ignorePaths || [];
     if (typeof ignorePaths === "string") {
