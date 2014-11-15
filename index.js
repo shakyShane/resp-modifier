@@ -7,20 +7,27 @@ module.exports = function (opt) {
             // text files
             "js", "json", "css",
             // image files
-            //"png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
+            "png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
             // vector & font
-            //"svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
+            "svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
             // audio
-            //"mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
+            "mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
             // video & other media
-            //"mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
+            "mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
             // document files
-            //"pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
+            "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
             // data files
-            //"zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
+            "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
         ].map(function(ext) { return '\\.' + ext  + '(\\?.*)?$' });
     var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
     var ignorePaths = opt.ignorePaths || [];
+    if (typeof ignorePaths === "string") {
+        ignorePaths = [ignorePaths];
+    }
+    var includePaths = opt.includePaths || false;
+    if (typeof includePaths === "string") {
+        includePaths = [includePaths];
+    }
     var html = opt.html || _html;
     var rules = opt.rules || [];
 
@@ -82,19 +89,29 @@ module.exports = function (opt) {
     function check(url) {
 
         url = url.replace(/^\//, "");
+
         var ignored = false;
 
         if (!url) {
             return true;
         }
-        // first, always exit on matched file extentions
+
+        // first, check the INCLUDES
+        if (includePaths) {
+            return ! includePaths.some(function (pattern) {
+                return minimatch(url, pattern);
+            });
+        }
+
+        // second, check that the URL does not contain a
+        // file extension that should be ignored by default
         if (ignore.some(function (pattern) {
             return new RegExp(pattern).test(url);
         })) {
             return true;
         }
 
-        // Finally, check any mini-match patterns
+        // Finally, check any mini-match patterns for paths that have been excluded
         return ignorePaths.some(function (pattern) {
             return minimatch(url, pattern);
         });
