@@ -27,12 +27,16 @@
   "scripts": {
     "test": "mocha"
   },
-  "dependencies": {},
+  "dependencies": {
+    "minimatch": "^1.0.0"
+  },
   "devDependencies": {
-    "gulp": "~3.5.2",
-    "gulp-mocha": "~0.4.1",
-    "gulp-jshint": "~1.4.0",
+    "chai": "^1.10.0",
     "express": "~3.2.2",
+    "gulp": "~3.5.2",
+    "gulp-jshint": "~1.4.0",
+    "gulp-mocha": "~0.4.1",
+    "multiline": "^1.0.1",
     "supertest": "~0.6.0"
   },
   "keywords": []

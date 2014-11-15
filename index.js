@@ -1,3 +1,5 @@
+var minimatch = require("minimatch");
+
 module.exports = function (opt) {
     // options
     opt = opt || {};
@@ -16,8 +18,16 @@ module.exports = function (opt) {
             "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
             // data files
             "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
-        ].map(function(ext) { return '.' + ext; });
+        ].map(function(ext) { return '\\.' + ext  + '(\\?.*)?$' });
     var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
+    var ignorePaths = opt.ignorePaths || [];
+    if (typeof ignorePaths === "string") {
+        ignorePaths = [ignorePaths];
+    }
+    var includePaths = opt.includePaths || false;
+    if (typeof includePaths === "string") {
+        includePaths = [includePaths];
+    }
     var html = opt.html || _html;
     var rules = opt.rules || [];
 
@@ -76,18 +86,35 @@ module.exports = function (opt) {
         return (~ha.indexOf("html"));
     }
 
-    function leave(req) {
-        var url = req.url;
+    function check(url) {
+
+        url = url.replace(/^\//, "");
+
         var ignored = false;
+
         if (!url) {
             return true;
         }
-        ignore.forEach(function(item) {
-            if (~url.indexOf(item)) {
-                ignored = true;
-            }
+
+        // first, check the INCLUDES
+        if (includePaths) {
+            return ! includePaths.some(function (pattern) {
+                return minimatch(url, pattern);
+            });
+        }
+
+        // second, check that the URL does not contain a
+        // file extension that should be ignored by default
+        if (ignore.some(function (pattern) {
+            return new RegExp(pattern).test(url);
+        })) {
+            return true;
+        }
+
+        // Finally, check any mini-match patterns for paths that have been excluded
+        return ignorePaths.some(function (pattern) {
+            return minimatch(url, pattern);
         });
-        return ignored;
     }
 
     // middleware
@@ -101,7 +128,7 @@ module.exports = function (opt) {
         var write = res.write;
         var end = res.end;
 
-        if (!accept(req) || leave(req)) {
+        if (!accept(req) || check(req.url)) {
             return next();
         }
 
