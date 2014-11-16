@@ -35,12 +35,12 @@
     "minimatch": "^1.0.0"
   },
   "devDependencies": {
+    "chai": "^1.10.0",
     "express": "~3.2.2",
     "gulp": "^3.8.7",
     "gulp-jshint": "~1.8.4",
     "mocha": "^1.21.4",
-    "supertest": "~0.13.0",
-    "chai": "^1.10.0",
+    "multiline": "^1.0.1",
     "supertest": "~0.6.0"
   },
   "keywords": []
