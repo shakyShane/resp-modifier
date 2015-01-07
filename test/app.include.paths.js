@@ -6,10 +6,9 @@ var app       = express();
 // run the tests
 var request = require("supertest");
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+//app.use(express.methodOverride());
 
-var livereload = require("../index.js");
+var livereload = require("..");
 
 app.use(livereload({
     rules: [

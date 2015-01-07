@@ -1,32 +1,30 @@
 var express = require("express");
-var app = express();
 var fs = require("fs");
+var serveStatic = require("serve-static");
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+var app = express();
+
+//app.use(express.bodyParser());
+//app.use(express.methodOverride());
 
 // load liveReload script only in development mode
-app.configure("development", function () {
+if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("../index.js");
-
-    function buume(w) {
-        return "\n\n joggeli buume \n\n" + w;
-    }
-
-    function pfluume(w) {
-        return "\n\n het gern pfluume \n\n" + w;
-    }
+    var livereload = require("..");
 
     app.use(livereload({
         rules: [
             {
                 match: /<\/body>/,
-                fn: buume
+                fn: function buume(w) {
+                  return "\n\n joggeli buume \n\n" + w;
+                }
             },
             {
                 match: /<\/head>/,
-                fn: pfluume
+                fn: function pfluume(w) {
+                  return "\n\n het gern pfluume \n\n" + w;
+                }
             },
             {
                 match: new RegExp("0.0.0.0:8000", "g"),
@@ -35,14 +33,11 @@ app.configure("development", function () {
                 }
             }
         ]
-    }));
-});
+    }));  
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
-
-// load the routes
-app.use(app.router);
+app.use(serveStatic(__dirname + "/fixtures"));
 
 app.get("/body", function (req, res) {
     var html = "<!DOCTYPE html><body>fettwanz auf dem tanz</body>";

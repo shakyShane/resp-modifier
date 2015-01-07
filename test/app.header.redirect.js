@@ -1,21 +1,16 @@
 var express = require("express");
+var serveStatic = require("serve-static");
+
 var app = express();
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-
 // load liveReload script only in development mode
-app.configure("development", function () {
-    // live reload script
-    var livereload = require("../index.js");
+if (app.get("env") === "development") {
+    var livereload = require("..");
     app.use(livereload());
-});
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
-
-// load the routes
-app.use(app.router);
+app.use(serveStatic(__dirname + "/fixtures"));
 
 app.get("/redirect_to_favicon", function (req, res) {
     res.writeHead(302, {"Location": "/favicon.ico"});

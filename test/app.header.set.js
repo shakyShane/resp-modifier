@@ -1,13 +1,12 @@
 var express = require("express");
-var app = express();
+var serveStatic = require("serve-static");
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+var app = express();
 
 var matcher = "<b>thisString</b>";
 
 // load liveReload script only in development mode
-app.configure("development", function () {
+if (app.get("env") === "development") {
     // live reload script
     var livereload = require("../index.js");
     app.use(livereload({
@@ -21,13 +20,10 @@ app.configure("development", function () {
         ],
         port: 35729
     }));
-});
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
-
-// load the routes
-app.use(app.router);
+app.use(serveStatic(__dirname + "/fixtures"));
 
 app.get("/set_length", function (req, res) {
     var html = "<html><head></head><body><p>set_length</p></body></html>";

@@ -1,15 +1,14 @@
 var express = require("express");
-var app = express();
 var fs = require("fs");
+var serveStatic = require("serve-static");
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+var app = express();
 
 var matcher = "resp-mod-tested";
 // load liveReload script only in development mode
-app.configure("development", function () {
+if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("../index.js");
+    var livereload = require("..");
     app.use(livereload({
         rules: [
             {
@@ -27,13 +26,10 @@ app.configure("development", function () {
         port: 35731,
         ignore: [".hammel"]
     }));
-});
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
-
-// load the routes
-app.use(app.router);
+app.use(serveStatic(__dirname + "/fixtures"));
 
 app.get("/stream", function (req, res) {
     var stream = fs.createReadStream(__dirname + "/fixtures/large-file.html");
