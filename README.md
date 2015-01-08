@@ -1,4 +1,4 @@
-# resp-modifier [![Build Status](https://travis-ci.org/shakyShane/resp-modifier.png?branch=master)](https://travis-ci.org/shakyShane/resp-modifier)
+# resp-modifier [![Build Status](https://travis-ci.org/shakyShane/resp-modifier.svg?branch=master)](https://travis-ci.org/shakyShane/resp-modifier)
 
 All the good parts from [connect-livereload](https://github.com/intesso/connect-livereload) without
 the livereload specific bits & with multiple replacements added.

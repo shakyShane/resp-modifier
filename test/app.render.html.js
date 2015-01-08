@@ -1,13 +1,12 @@
 var express = require("express");
+var serveStatic = require("serve-static");
+
 var app = express();
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-
 // load liveReload script only in development mode
-app.configure("development", function () {
+if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("../index.js");
+    var livereload = require("..");
     app.use(livereload({
         rules: [
             {
@@ -19,13 +18,10 @@ app.configure("development", function () {
         ],
         ignore: [".woff", ".flv"]
     }));
-});
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
-
-// load the routes
-app.use(app.router);
+app.use(serveStatic(__dirname + "/fixtures"));
 
 app.get("/dummies", function (req, res) {
     var html = "<!DOCTYPE html> html5 for dummies";

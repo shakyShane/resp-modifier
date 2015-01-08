@@ -1,15 +1,14 @@
 var express = require("express");
-var app = express();
 var fs = require("fs");
 var path = require("path");
+var serveStatic = require("serve-static");
 
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+var app = express();
 
 // load liveReload script only in development mode
-app.configure("development", function () {
+if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("../index.js");
+    var livereload = require("..");
     app.use(livereload({
         rules: [
             {
@@ -20,12 +19,10 @@ app.configure("development", function () {
             }
         ]
     }));
-});
-// load the routes
-app.use(app.router);
+}
 
 // load static content before routing takes place
-app.use(express["static"](__dirname + "/fixtures"));
+app.use(serveStatic(__dirname + "/fixtures"));
 
 // start the server
 if (!module.parent) {
