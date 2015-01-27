@@ -124,7 +124,7 @@ module.exports = function (opt) {
     }
 
     // middleware
-    return function (req, res, next) {
+    return function respModifier(req, res, next) {
         if (res._livereload) {
             return next();
         }
