@@ -19,7 +19,7 @@ app.use(livereload({
             }
         }
     ],
-    whitelist: ["app/**/*.html"],
+    whitelist: ["/app/**/*.html"],
     blacklist: ["**/home.html"]
 }));
 

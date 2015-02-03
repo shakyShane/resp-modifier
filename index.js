@@ -110,8 +110,6 @@ module.exports = function (opts) {
             return false;
         }
 
-        url = url.replace(/^\//, "");
-
         if (!url) {
             return true;
         }

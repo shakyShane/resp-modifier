@@ -18,7 +18,7 @@ app.use(livereload({
             }
         }
     ],
-    blacklist: ["templates/*.html"]
+    blacklist: ["/templates/*.html"]
 }));
 
 var output = multiline(function () {/*
