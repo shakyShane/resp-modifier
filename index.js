@@ -1,8 +1,12 @@
+"use strict";
+
 var minimatch = require("minimatch");
 
-module.exports = function (opt) {
+module.exports = function (opts) {
+
     // options
-    opt = opt || {};
+    opts = opts || {};
+
     var defaultIgnoreTypes = [
             // text files
             "js", "json", "css",
@@ -19,17 +23,13 @@ module.exports = function (opt) {
             // data files
             "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
         ].map(function(ext) { return "\\." + ext  + "(\\?.*)?$"; });
-    var ignore = opt.ignore || opt.excludeList || defaultIgnoreTypes;
-    var ignorePaths = opt.ignorePaths || [];
-    if (typeof ignorePaths === "string") {
-        ignorePaths = [ignorePaths];
-    }
-    var includePaths = opt.includePaths || false;
-    if (typeof includePaths === "string") {
-        includePaths = [includePaths];
-    }
-    var html = opt.html || _html;
-    var rules = opt.rules || [];
+
+    var ignore     = opts.ignore || opts.excludeList || defaultIgnoreTypes;
+
+    var blacklist  = toArray(opts.blacklist) || [];
+    var whitelist  = toArray(opts.whitelist) || [];
+
+    var rules = opts.rules || [];
 
     // helper functions
     var regex = (function() {
@@ -39,7 +39,17 @@ module.exports = function (opt) {
         return new RegExp(matches);
     })();
 
-    function _html(str) {
+    function toArray(item) {
+        if (!item) {
+            return item;
+        }
+        if (!Array.isArray(item)) {
+            return [item];
+        }
+        return item;
+    }
+
+    function isHtml(str) {
         if (!str) {
             return false;
         }
@@ -63,8 +73,7 @@ module.exports = function (opt) {
         }
     }
 
-    function snap(body) {
-
+    function overwriteBody(body) {
         var _body = body;
         rules.forEach(function(rule) {
             if (rule.match.test(body)) {
@@ -78,7 +87,11 @@ module.exports = function (opt) {
         return _body;
     }
 
-    function accept(req) {
+    /**
+     * @param req
+     * @returns {*}
+     */
+    function hasAcceptHeaders(req) {
         var ha = req.headers["accept"];
         if (!ha) {
             return false;
@@ -86,7 +99,12 @@ module.exports = function (opt) {
         return (~ha.indexOf("html"));
     }
 
-    function check(url) {
+    /**
+     * Determine if a response should be overwritten
+     * @param url
+     * @returns {boolean}
+     */
+    function shouldNotOverwrite(url) {
 
         if (url.length === 1 && url === "/") {
             return false;
@@ -98,13 +116,6 @@ module.exports = function (opt) {
             return true;
         }
 
-        // first, check the INCLUDES
-        if (includePaths) {
-            return ! includePaths.some(function (pattern) {
-                return minimatch(url, pattern);
-            });
-        }
-
         // second, check that the URL does not contain a
         // file extension that should be ignored by default
         if (ignore.some(function (pattern) {
@@ -114,7 +125,7 @@ module.exports = function (opt) {
         }
 
         // Finally, check any mini-match patterns for paths that have been excluded
-        if (ignorePaths.some(function (pattern) {
+        if (blacklist.some(function (pattern) {
             return minimatch(url, pattern);
         })) {
             return true;
@@ -123,86 +134,111 @@ module.exports = function (opt) {
         return false;
     }
 
-    // middleware
+    /**
+     * Check if a URL was white-listed
+     * @param url
+     * @returns {boolean}
+     */
+    function isWhitelisted (url) {
+        return whitelist.some(function (pattern) {
+            return minimatch(url, pattern);
+        });
+    }
+
+    /**
+     * Middleware
+     */
     return function respModifier(req, res, next) {
-        if (res._livereload) {
+
+        if (res._respModifier) {
             return next();
         }
-        res._livereload = true;
+
+        res._respModifier = true;
 
         var writeHead = res.writeHead;
         var write = res.write;
         var end = res.end;
 
-        if (!accept(req) || check(req.url)) {
-            return next();
+        if (isWhitelisted(req.url)) {
+            modifyResponse();
+        } else {
+            if (!hasAcceptHeaders(req) || shouldNotOverwrite(req.url)) {
+                return next();
+            } else {
+                modifyResponse();
+            }
         }
 
-        req.headers["accept-encoding"] = "identity";
-
-        function restore() {
-            res.writeHead = writeHead;
-            res.write = write;
-            res.end = end;
-        }
-
-        res.push = function(chunk) {
-            res.data = (res.data || "") + chunk;
-        };
-
-        res.inject = res.write = function(string, encoding) {
-            if (string !== undefined) {
-                var body = string instanceof Buffer ? string.toString(encoding) : string;
-                if (html(body) || html(res.data)) {
-                    if (exists(body) && !snip(res.data)) {
-                        var newString = snap(body);
-                        res.push(newString);
-                    } else {
-                        res.push(body);
-                    }
-                    return true;
-                } else {
-                    restore();
-                    return write.call(res, string, encoding);
-                }
-            }
-            return true;
-        };
-
-        res.writeHead = function() {
-            var headers = arguments[arguments.length - 1];
-            if (headers && typeof headers === "object") {
-                for (var name in headers) {
-                    if (/content-length/i.test(name)) {
-                        delete headers[name];
-                    }
-                }
-            }
-
-            var header = res.getHeader( "content-length" );
-            if ( header ) {
-                res.removeHeader( "content-length" );
-            }
-
-            writeHead.apply(res, arguments);
-        };
-
-        res.end = function(string, encoding) {
-
-            restore();
-
-            var result = res.inject(string, encoding);
-
-            if (!result) {
-                return end.call(res, string, encoding);
-            }
-
-            if (res.data !== undefined && !res._header) {
-                res.setHeader("content-length", Buffer.byteLength(res.data, encoding));
-            }
-
-            res.end(res.data, encoding);
-        };
         next();
+
+        function modifyResponse() {
+
+            req.headers["accept-encoding"] = "identity";
+
+            function restore() {
+                res.writeHead = writeHead;
+                res.write = write;
+                res.end = end;
+            }
+
+            res.push = function(chunk) {
+                res.data = (res.data || "") + chunk;
+            };
+
+            res.inject = res.write = function(string, encoding) {
+                if (string !== undefined) {
+                    var body = string instanceof Buffer ? string.toString(encoding) : string;
+                    if (isHtml(body) || isHtml(res.data)) {
+                        if (exists(body) && !snip(res.data)) {
+                            var newString = overwriteBody(body);
+                            res.push(newString);
+                        } else {
+                            res.push(body);
+                        }
+                        return true;
+                    } else {
+                        restore();
+                        return write.call(res, string, encoding);
+                    }
+                }
+                return true;
+            };
+
+            res.writeHead = function() {
+                var headers = arguments[arguments.length - 1];
+                if (headers && typeof headers === "object") {
+                    for (var name in headers) {
+                        if (/content-length/i.test(name)) {
+                            delete headers[name];
+                        }
+                    }
+                }
+
+                var header = res.getHeader( "content-length" );
+                if ( header ) {
+                    res.removeHeader( "content-length" );
+                }
+
+                writeHead.apply(res, arguments);
+            };
+
+            res.end = function(string, encoding) {
+
+                restore();
+
+                var result = res.inject(string, encoding);
+
+                if (!result) {
+                    return end.call(res, string, encoding);
+                }
+
+                if (res.data !== undefined && !res._header) {
+                    res.setHeader("content-length", Buffer.byteLength(res.data, encoding));
+                }
+
+                res.end(res.data, encoding);
+            };
+        }
     };
 };

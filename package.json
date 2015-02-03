@@ -1,7 +1,7 @@
 {
   "name": "resp-modifier",
   "description": "Middleware for modifying a HTML response",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": {
     "name": "Shane Osbourne",
     "email": "shane.osbourne8@gmail.com"
@@ -14,26 +14,24 @@
     }
   ],
   "files": [
-    "index.js",
-    "LICENSE-MIT"
+    "index.js"
   ],
   "engines": {
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "gulp lint && mocha"
+    "test": "jshint test/*.js index.js && mocha"
   },
   "dependencies": {
-    "minimatch": "^2.0.0"
+    "minimatch": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^1.10.0",
-    "express": "^4.10.7",
-    "gulp": "^3.8.10",
-    "gulp-jshint": "^1.9.0",
+    "express": "^4.11.2",
+    "jshint": "^2.6.0",
     "mocha": "^2.1.0",
-    "multiline": "^1.0.1",
-    "serve-static": "^1.8.0",
+    "multiline": "^1.0.2",
+    "serve-static": "^1.8.1",
     "supertest": "^0.15.0"
   },
   "keywords": []

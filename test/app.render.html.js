@@ -15,8 +15,7 @@ if (app.get("env") === "development") {
                     return "matcher";
                 }
             }
-        ],
-        ignore: [".woff", ".flv"]
+        ]
     }));
 }
 
