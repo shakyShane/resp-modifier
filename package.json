@@ -26,13 +26,13 @@
     "minimatch": "^2.0.1"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
+    "chai": "^2.3.0",
     "express": "^4.11.2",
     "jshint": "^2.6.0",
     "mocha": "^2.1.0",
     "multiline": "^1.0.2",
     "serve-static": "^1.8.1",
-    "supertest": "^0.15.0"
+    "supertest": "^1.0.1"
   },
   "keywords": []
 }

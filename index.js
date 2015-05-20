@@ -104,14 +104,15 @@ module.exports = function (opts) {
      * @param url
      * @returns {boolean}
      */
-    function shouldNotOverwrite(url) {
+    function inBlackList(url) {
+
+        // First check for an exact match
+        if (!url || blacklist.indexOf(url) > -1) {
+            return true;
+        }
 
         if (url.length === 1 && url === "/") {
             return false;
-        }
-
-        if (!url) {
-            return true;
         }
 
         // second, check that the URL does not contain a
@@ -161,7 +162,7 @@ module.exports = function (opts) {
         if (isWhitelisted(req.url)) {
             modifyResponse();
         } else {
-            if (!hasAcceptHeaders(req) || shouldNotOverwrite(req.url)) {
+            if (!hasAcceptHeaders(req) || inBlackList(req.url)) {
                 return next();
             } else {
                 modifyResponse();
