@@ -139,6 +139,11 @@ module.exports = function (opts) {
      * @returns {boolean}
      */
     function isWhitelisted (url) {
+
+        if (whitelist.indexOf(url) > -1) {
+            return true;
+        }
+
         return whitelist.some(function (pattern) {
             return minimatch(url, pattern);
         });

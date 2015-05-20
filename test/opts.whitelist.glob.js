@@ -6,16 +6,18 @@ var livereload = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
-describe("Black listing exact matches", function () {
+describe("White listing glob matches", function () {
 
-    var app, routes, expected;
+    var app, routes, expected, whitelist, blacklist;
 
     before(function () {
 
         app = express();
 
         // run the tests
-        routes   = ["/templates/ignore-path.html", "/", "/shane"];
+        routes    = ["/blog/post/post1.html", "/index.html", "/some/path", "/blog.html"];
+        whitelist = ["/blog/**/*.html", "/index.html"];
+        blacklist = "**/*.html";
 
         app.use(livereload({
             rules: [
@@ -26,7 +28,8 @@ describe("Black listing exact matches", function () {
                     }
                 }
             ],
-            blacklist: routes
+            whitelist: whitelist,
+            blacklist: blacklist
         }));
 
         expected = output.replace("IGNORE", "TEST");
@@ -37,21 +40,27 @@ describe("Black listing exact matches", function () {
             });
         });
     });
-    it("should not allow a long path", function (done) {
+    it("should allow a path blog", function (done) {
         request(app)
             .get(routes[0])
             .set("Accept", "text/html")
-            .expect(200, output, done);
+            .expect(200, expected, done);
     });
-    it("should not allow single slash (homepage)", function (done) {
+    it("should allow a single exact match", function (done) {
         request(app)
             .get(routes[1])
             .set("Accept", "text/html")
-            .expect(200, output, done);
+            .expect(200, expected, done);
     });
-    it("should not allow a path", function (done) {
+    it("still work on /some/path because it doesn't match **/*.html", function (done) {
         request(app)
             .get(routes[2])
+            .set("Accept", "text/html")
+            .expect(200, expected, done);
+    });
+    it("should not work on /blog.html as it isn't in whitelist but matches the blacklist glob", function (done) {
+        request(app)
+            .get(routes[3])
             .set("Accept", "text/html")
             .expect(200, output, done);
     });

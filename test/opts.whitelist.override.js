@@ -6,16 +6,17 @@ var livereload = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
-describe("Black listing exact matches", function () {
+describe("White listing Overriding blacklist", function () {
 
-    var app, routes, expected;
+    var app, routes, expected, whitelist;
 
     before(function () {
 
         app = express();
 
         // run the tests
-        routes   = ["/templates/ignore-path.html", "/", "/shane"];
+        routes    = ["/templates/ignore-path.html", "/templates/path", "/"];
+        whitelist = ["/templates/ignore-path.html", "/"];
 
         app.use(livereload({
             rules: [
@@ -26,7 +27,8 @@ describe("Black listing exact matches", function () {
                     }
                 }
             ],
-            blacklist: routes
+            whitelist: whitelist,
+            blacklist: ["**/*"]
         }));
 
         expected = output.replace("IGNORE", "TEST");
@@ -37,21 +39,15 @@ describe("Black listing exact matches", function () {
             });
         });
     });
-    it("should not allow a long path", function (done) {
+    it("should work on /templates/ignore-path.html because it's in the whitelist", function (done) {
         request(app)
             .get(routes[0])
             .set("Accept", "text/html")
-            .expect(200, output, done);
+            .expect(200, expected, done);
     });
-    it("should not allow single slash (homepage)", function (done) {
+    it("should not work on /templates/path because **/* in blacklist", function (done) {
         request(app)
             .get(routes[1])
-            .set("Accept", "text/html")
-            .expect(200, output, done);
-    });
-    it("should not allow a path", function (done) {
-        request(app)
-            .get(routes[2])
             .set("Accept", "text/html")
             .expect(200, output, done);
     });

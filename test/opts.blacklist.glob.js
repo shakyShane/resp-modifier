@@ -4,7 +4,7 @@ var assert = require("chai").assert;
 var request = require("supertest");
 var livereload = require("..");
 
-var output = '<!doctype html><html lang="en-US"><head><meta charset="UTF-8"><title></title></head><body>IGNORE</body></html>';
+var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
 describe("Black listing glob matches", function () {
 
@@ -29,7 +29,7 @@ describe("Black listing glob matches", function () {
             blacklist: blacklist
         }));
 
-        expected = output.replace('IGNORE', 'TEST');
+        expected = output.replace("IGNORE", "TEST");
 
         routes.forEach(function (route) {
             app.get(route, function (req, res) {
