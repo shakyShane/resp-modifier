@@ -41,14 +41,20 @@ function RespModifier (opts) {
         var writeHead = res.writeHead;
         var write = res.write;
         var end = res.end;
+        var singlerules = utils.isWhiteListedForSingle(req.url, respMod.opts.rules);
 
-        if (utils.isWhitelisted(req.url, respMod.opts)) {
-            modifyResponse(true);
+        if (singlerules.length) {
+            modifyResponse(singlerules, true);
         } else {
-            if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
-                return next();
+            if (utils.isWhitelisted(req.url, respMod.opts.whitelist)) {
+                modifyResponse(respMod.opts.rules, true);
             } else {
-                modifyResponse();
+
+                if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
+                    return next();
+                } else {
+                    modifyResponse(respMod.opts.rules);
+                }
             }
         }
 
@@ -56,9 +62,9 @@ function RespModifier (opts) {
 
         /**
          * Actually do the overwrite
-         * @param {boolean} force - if true, will perform an overwrite even regardless of whether it's HTML or not.
+         * @param {boolean} [force] - if true, will perform an overwrite even regardless of whether it's HTML or not.
          */
-        function modifyResponse(force) {
+        function modifyResponse(rules, force) {
 
             req.headers["accept-encoding"] = "identity";
 
@@ -77,7 +83,7 @@ function RespModifier (opts) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
                     if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
                         if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
-                            var newString = utils.overwriteBody(respMod.opts.rules, body);
+                            var newString = utils.overwriteBody(rules, body);
                             res.push(newString);
                         } else {
                             res.push(body);
