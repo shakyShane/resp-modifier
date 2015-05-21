@@ -2,38 +2,69 @@
 
 var minimatch = require("minimatch");
 
-module.exports = function (opts) {
+function overwriteBody(rules, body) {
+
+    rules.forEach(function(rule) {
+
+        /**
+         * Try to use the replace string/fn first
+         */
+        if (rule.replace) {
+            rule.fn = rule.replace;
+        }
+
+        /**
+         * if rule.match is a string, convert
+         * it to a global regex and do the replacement
+         */
+        if (typeof rule.match === "string") {
+            return body = body.replace(new RegExp(rule.match, "g"), rule.fn);
+        }
+
+        /**
+         * A regex was given? do the replacement
+         */
+        body = body.replace(rule.match, rule.fn);
+
+    });
+
+    return body;
+}
+
+function respModifier (opts) {
 
     // options
     opts = opts || {};
 
     var defaultIgnoreTypes = [
-            // text files
-            "js", "json", "css",
-            // image files
-            "png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
-            // vector & font
-            "svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
-            // audio
-            "mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
-            // video & other media
-            "mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
-            // document files
-            "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
-            // data files
-            "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
-        ].map(function(ext) { return "\\." + ext  + "(\\?.*)?$"; });
+        // text files
+        "js", "json", "css",
+        // image files
+        "png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
+        // vector & font
+        "svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
+        // audio
+        "mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
+        // video & other media
+        "mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
+        // document files
+        "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
+        // data files
+        "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
+    ].map(function (ext) {
+            return "\\." + ext + "(\\?.*)?$";
+        });
 
-    var ignore     = opts.ignore || opts.excludeList || defaultIgnoreTypes;
+    var ignore = opts.ignore || opts.excludeList || defaultIgnoreTypes;
 
-    var blacklist  = toArray(opts.blacklist) || [];
-    var whitelist  = toArray(opts.whitelist) || [];
+    var blacklist = toArray(opts.blacklist) || [];
+    var whitelist = toArray(opts.whitelist) || [];
 
     var rules = opts.rules || [];
 
     // helper functions
-    var regex = (function() {
-        var matches = rules.map(function(item) {
+    var regex = (function () {
+        var matches = rules.map(function (item) {
             return item.match.source;
         }).join("|");
         return new RegExp(matches);
@@ -73,20 +104,6 @@ module.exports = function (opts) {
         }
     }
 
-    function overwriteBody(body) {
-        var _body = body;
-        rules.forEach(function(rule) {
-            if (rule.match.test(body)) {
-                _body = _body.replace(rule.match, function(w) {
-                    return rule.fn(w);
-                });
-                return true;
-            }
-            return false;
-        });
-        return _body;
-    }
-
     /**
      * @param req
      * @returns {*}
@@ -118,15 +135,15 @@ module.exports = function (opts) {
         // second, check that the URL does not contain a
         // file extension that should be ignored by default
         if (ignore.some(function (pattern) {
-            return new RegExp(pattern).test(url);
-        })) {
+                return new RegExp(pattern).test(url);
+            })) {
             return true;
         }
 
         // Finally, check any mini-match patterns for paths that have been excluded
         if (blacklist.some(function (pattern) {
-            return minimatch(url, pattern);
-        })) {
+                return minimatch(url, pattern);
+            })) {
             return true;
         }
 
@@ -138,7 +155,7 @@ module.exports = function (opts) {
      * @param url
      * @returns {boolean}
      */
-    function isWhitelisted (url) {
+    function isWhitelisted(url) {
 
         if (whitelist.indexOf(url) > -1) {
             return true;
@@ -186,16 +203,16 @@ module.exports = function (opts) {
                 res.end = end;
             }
 
-            res.push = function(chunk) {
+            res.push = function (chunk) {
                 res.data = (res.data || "") + chunk;
             };
 
-            res.inject = res.write = function(string, encoding) {
+            res.inject = res.write = function (string, encoding) {
                 if (string !== undefined) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
                     if (isHtml(body) || isHtml(res.data)) {
                         if (exists(body) && !snip(res.data)) {
-                            var newString = overwriteBody(body);
+                            var newString = overwriteBody(rules, body);
                             res.push(newString);
                         } else {
                             res.push(body);
@@ -209,7 +226,7 @@ module.exports = function (opts) {
                 return true;
             };
 
-            res.writeHead = function() {
+            res.writeHead = function () {
                 var headers = arguments[arguments.length - 1];
                 if (headers && typeof headers === "object") {
                     for (var name in headers) {
@@ -219,15 +236,15 @@ module.exports = function (opts) {
                     }
                 }
 
-                var header = res.getHeader( "content-length" );
-                if ( header ) {
-                    res.removeHeader( "content-length" );
+                var header = res.getHeader("content-length");
+                if (header) {
+                    res.removeHeader("content-length");
                 }
 
                 writeHead.apply(res, arguments);
             };
 
-            res.end = function(string, encoding) {
+            res.end = function (string, encoding) {
 
                 restore();
 
@@ -245,4 +262,7 @@ module.exports = function (opts) {
             };
         }
     };
-};
+}
+
+module.exports = respModifier;
+module.exports.overwriteBody = overwriteBody;
