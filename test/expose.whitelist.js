@@ -5,9 +5,9 @@ var livereload = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
-describe("Exposing rules", function () {
+describe("Exposing and updating the whitelist", function () {
 
-    var app, routes, expected1, expected2, lr;
+    var app, routes, expected, lr;
 
     before(function () {
 
@@ -20,15 +20,17 @@ describe("Exposing rules", function () {
             rules: [
                 {
                     match: /IGNORE/,
-                    fn: "TEST"
+                    fn: function (w) {
+                        return "TEST";
+                    }
                 }
-            ]
+            ],
+            blacklist: ["**/*"]
         });
 
         app.use(lr.middleware);
 
-        expected1 = output.replace("IGNORE", "TEST");
-        expected2 = output.replace("IGNORE", "TEST").replace("<body>", "<body class=\"Aww yeah\">");
+        expected = output.replace("IGNORE", "TEST");
 
         routes.forEach(function (route) {
             app.get(route, function (req, res) {
@@ -36,25 +38,21 @@ describe("Exposing rules", function () {
             });
         });
     });
-    it("should replace once, and then replace with updated rules", function (done) {
-
+    it("should initially allow 0 routes, but then allow one", function (done) {
         request(app)
             .get(routes[0])
             .set("Accept", "text/html")
             .end(function (err, res) {
 
-                assert.equal(res.text, expected1);
+                assert.equal(res.text, output);
 
-                lr.opts.rules.push({
-                    match: "<body>",
-                    replace: "<body class=\"Aww yeah\">"
-                });
+                lr.opts.whitelist.push(routes[0]);
 
                 request(app)
                     .get(routes[0])
                     .set("Accept", "text/html")
                     .end(function (err, res) {
-                        assert.equal(res.text, expected2);
+                        assert.equal(res.text, expected);
                         done();
                     });
 
