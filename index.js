@@ -6,9 +6,9 @@ function RespModifier (opts) {
 
     // options
     opts           = opts || {};
-    opts.blacklist = utils.toArray(opts.blacklist) || [];
-    opts.whitelist = utils.toArray(opts.whitelist) || [];
-    opts.rules     = opts.rules              || [];
+    opts.blacklist = utils.toArray(opts.blacklist)   || [];
+    opts.whitelist = utils.toArray(opts.whitelist)   || [];
+    opts.rules     = opts.rules                      || [];
     opts.ignore    = opts.ignore || opts.excludeList || utils.defaultIgnoreTypes;
 
     // helper functions
@@ -19,11 +19,16 @@ function RespModifier (opts) {
         return new RegExp(matches);
     })();
 
-    var respMod = this;
+    var respMod        = this;
 
-    respMod.opts = opts;
-
+    respMod.opts       = opts;
     respMod.middleware = respModifierMiddleware;
+    respMod.update = function (key, value) {
+        if (respMod.opts[key]) {
+            respMod.opts[key] = value;
+        }
+        return respMod;
+    };
 
     function respModifierMiddleware(req, res, next) {
 
@@ -38,7 +43,7 @@ function RespModifier (opts) {
         var end = res.end;
 
         if (utils.isWhitelisted(req.url, respMod.opts)) {
-            modifyResponse();
+            modifyResponse(true);
         } else {
             if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
                 return next();
@@ -49,7 +54,11 @@ function RespModifier (opts) {
 
         next();
 
-        function modifyResponse() {
+        /**
+         * Actually do the overwrite
+         * @param {boolean} force - if true, will perform an overwrite even regardless of whether it's HTML or not.
+         */
+        function modifyResponse(force) {
 
             req.headers["accept-encoding"] = "identity";
 
@@ -66,7 +75,7 @@ function RespModifier (opts) {
             res.inject = res.write = function (string, encoding) {
                 if (string !== undefined) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
-                    if (utils.isHtml(body) || utils.isHtml(res.data)) {
+                    if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
                         if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
                             var newString = utils.overwriteBody(respMod.opts.rules, body);
                             res.push(newString);
