@@ -3,32 +3,34 @@ var assert = require("chai").assert;
 var request = require("supertest");
 var livereload = require("..");
 
-var output = "jQuery.ajax({" +
-    "url: paths.url" +
-    "})";
+var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
-describe("Example of overwriting a JS file", function () {
+describe("Adding rules with single paths only", function () {
 
-    var app, routes, lr;
+    var app, routes, expected, lr;
 
     before(function () {
 
         app = express();
 
         // run the tests
-        routes = ["/js/app.js"];
+        routes = ["/index2.html"];
 
         lr = livereload.create({
-            rules: [
+            rules:     [
                 {
-                    paths: ["**/*.js"],
-                    match: "url: paths.url",
-                    replace: "url: paths.url + '?rel=' + new Date().getTime()",
+                    paths: ["/index.html"],
+                    match: /IGNORE/,
+                    fn: function (w) {
+                        return "TEST";
+                    }
                 }
             ]
         });
 
         app.use(lr.middleware);
+
+        expected = output.replace("IGNORE", "TEST");
 
         routes.forEach(function (route) {
             app.get(route, function (req, res) {
@@ -36,12 +38,12 @@ describe("Example of overwriting a JS file", function () {
             });
         });
     });
-    it("should overwrite a JS file", function (done) {
+    it("should not overwrite when a single path given", function (done) {
         request(app)
             .get(routes[0])
             .set("Accept", "text/html")
             .end(function (err, res) {
-                assert.equal(res.text, "jQuery.ajax({url: paths.url + '?rel=' + new Date().getTime()})");
+                assert.equal(res.text, output);
                 done();
             });
     });

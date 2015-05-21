@@ -19,7 +19,7 @@ describe("Adding rules with single paths", function () {
         lr = livereload.create({
             rules:     [
                 {
-                    paths: ['/index.html'],
+                    paths: ["/index.html"],
                     match: /IGNORE/,
                     fn: function (w) {
                         return "TEST";

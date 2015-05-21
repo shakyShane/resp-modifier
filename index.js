@@ -42,18 +42,23 @@ function RespModifier (opts) {
         var write = res.write;
         var end = res.end;
         var singlerules = utils.isWhiteListedForSingle(req.url, respMod.opts.rules);
+        var withoutSingle = respMod.opts.rules.filter(function (rule) {
+            if (rule.paths) {
+                return false;
+            }
+            return true;
+        });
 
         if (singlerules.length) {
             modifyResponse(singlerules, true);
         } else {
             if (utils.isWhitelisted(req.url, respMod.opts.whitelist)) {
-                modifyResponse(respMod.opts.rules, true);
+                modifyResponse(withoutSingle, true);
             } else {
-
                 if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
                     return next();
                 } else {
-                    modifyResponse(respMod.opts.rules);
+                    modifyResponse(withoutSingle);
                 }
             }
         }
