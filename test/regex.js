@@ -1,8 +1,7 @@
-var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var overwrite = require("..").overwriteBody;
+var overwrite = require("../lib/utils").overwriteBody;
 
 describe("Controlling regex replacements", function () {
     it("should allow simple string replacements", function () {

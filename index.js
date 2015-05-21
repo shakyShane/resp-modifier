@@ -1,175 +1,31 @@
 "use strict";
 
-var minimatch = require("minimatch");
+var utils     = require("./lib/utils");
 
-function overwriteBody(rules, body) {
-
-    rules.forEach(function(rule) {
-
-        /**
-         * Try to use the replace string/fn first
-         */
-        if (rule.replace) {
-            rule.fn = rule.replace;
-        }
-
-        /**
-         * if rule.match is a string, convert
-         * it to a global regex and do the replacement
-         */
-        if (typeof rule.match === "string") {
-            return body = body.replace(new RegExp(rule.match, "g"), rule.fn);
-        }
-
-        /**
-         * A regex was given? do the replacement
-         */
-        body = body.replace(rule.match, rule.fn);
-
-    });
-
-    return body;
-}
-
-function respModifier (opts) {
+function RespModifier (opts) {
 
     // options
-    opts = opts || {};
-
-    var defaultIgnoreTypes = [
-        // text files
-        "js", "json", "css",
-        // image files
-        "png", "jpg", "jpeg", "gif", "ico", "tif", "tiff", "bmp", "webp", "psd",
-        // vector & font
-        "svg", "woff", "ttf", "otf", "eot", "eps", "ps", "ai",
-        // audio
-        "mp3", "wav", "aac", "m4a", "m3u", "mid", "wma",
-        // video & other media
-        "mpg", "mpeg", "mp4", "m4v", "webm", "swf", "flv", "avi", "mov", "wmv",
-        // document files
-        "pdf", "doc", "docx", "xls", "xlsx", "pps", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "rtf", "txt", "csv",
-        // data files
-        "zip", "rar", "tar", "gz", "xml", "app", "exe", "jar", "dmg", "pkg", "iso"
-    ].map(function (ext) {
-            return "\\." + ext + "(\\?.*)?$";
-        });
-
-    var ignore = opts.ignore || opts.excludeList || defaultIgnoreTypes;
-
-    var blacklist = toArray(opts.blacklist) || [];
-    var whitelist = toArray(opts.whitelist) || [];
-
-    var rules = opts.rules || [];
+    opts           = opts || {};
+    opts.blacklist = utils.toArray(opts.blacklist) || [];
+    opts.whitelist = utils.toArray(opts.whitelist) || [];
+    opts.rules     = opts.rules              || [];
+    opts.ignore    = opts.ignore || opts.excludeList || utils.defaultIgnoreTypes;
 
     // helper functions
-    var regex = (function () {
-        var matches = rules.map(function (item) {
+    opts.regex = (function () {
+        var matches = opts.rules.map(function (item) {
             return item.match.source;
         }).join("|");
         return new RegExp(matches);
     })();
 
-    function toArray(item) {
-        if (!item) {
-            return item;
-        }
-        if (!Array.isArray(item)) {
-            return [item];
-        }
-        return item;
-    }
+    var respMod = this;
 
-    function isHtml(str) {
-        if (!str) {
-            return false;
-        }
-        // Test to see if start of file contents matches:
-        // - Optional byte-order mark (BOM)
-        // - Zero or more spaces
-        // - Any sort of HTML tag, comment, or doctype tag (basically, <...>)
-        return /^(\uFEFF|\uFFFE)?\s*<[^>]+>/i.test(str);
-    }
+    respMod.opts = opts;
 
-    function exists(body) {
-        if (!body) {
-            return false;
-        }
-        return regex.test(body);
-    }
+    respMod.middleware = respModifierMiddleware;
 
-    function snip(body) {
-        if (!body) {
-            return false;
-        }
-    }
-
-    /**
-     * @param req
-     * @returns {*}
-     */
-    function hasAcceptHeaders(req) {
-        var ha = req.headers["accept"];
-        if (!ha) {
-            return false;
-        }
-        return (~ha.indexOf("html"));
-    }
-
-    /**
-     * Determine if a response should be overwritten
-     * @param url
-     * @returns {boolean}
-     */
-    function inBlackList(url) {
-
-        // First check for an exact match
-        if (!url || blacklist.indexOf(url) > -1) {
-            return true;
-        }
-
-        if (url.length === 1 && url === "/") {
-            return false;
-        }
-
-        // second, check that the URL does not contain a
-        // file extension that should be ignored by default
-        if (ignore.some(function (pattern) {
-                return new RegExp(pattern).test(url);
-            })) {
-            return true;
-        }
-
-        // Finally, check any mini-match patterns for paths that have been excluded
-        if (blacklist.some(function (pattern) {
-                return minimatch(url, pattern);
-            })) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if a URL was white-listed
-     * @param url
-     * @returns {boolean}
-     */
-    function isWhitelisted(url) {
-
-        if (whitelist.indexOf(url) > -1) {
-            return true;
-        }
-
-        return whitelist.some(function (pattern) {
-            return minimatch(url, pattern);
-        });
-    }
-
-    /**
-     * Middleware
-     */
-    return function respModifier(req, res, next) {
+    function respModifierMiddleware(req, res, next) {
 
         if (res._respModifier) {
             return next();
@@ -181,10 +37,10 @@ function respModifier (opts) {
         var write = res.write;
         var end = res.end;
 
-        if (isWhitelisted(req.url)) {
+        if (utils.isWhitelisted(req.url, respMod.opts)) {
             modifyResponse();
         } else {
-            if (!hasAcceptHeaders(req) || inBlackList(req.url)) {
+            if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
                 return next();
             } else {
                 modifyResponse();
@@ -210,9 +66,9 @@ function respModifier (opts) {
             res.inject = res.write = function (string, encoding) {
                 if (string !== undefined) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
-                    if (isHtml(body) || isHtml(res.data)) {
-                        if (exists(body) && !snip(res.data)) {
-                            var newString = overwriteBody(rules, body);
+                    if (utils.isHtml(body) || utils.isHtml(res.data)) {
+                        if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
+                            var newString = utils.overwriteBody(respMod.opts.rules, body);
                             res.push(newString);
                         } else {
                             res.push(body);
@@ -261,8 +117,19 @@ function respModifier (opts) {
                 res.end(res.data, encoding);
             };
         }
-    };
+    }
+
+    return respMod;
 }
 
-module.exports = respModifier;
-module.exports.overwriteBody = overwriteBody;
+module.exports = function (opts) {
+    var resp = new RespModifier(opts);
+    return resp.middleware;
+};
+
+module.exports.create = function (opts) {
+    var resp = new RespModifier(opts);
+    return resp;
+};
+
+module.exports.utils = utils;

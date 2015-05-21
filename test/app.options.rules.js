@@ -33,7 +33,7 @@ if (app.get("env") === "development") {
                 }
             }
         ]
-    }));  
+    }));
 }
 
 // load static content before routing takes place
