@@ -1,7 +1,7 @@
 {
   "name": "resp-modifier",
   "description": "Middleware for modifying a HTML response",
-  "version": "3.1.2",
+  "version": "4.0.0",
   "author": {
     "name": "Shane Osbourne",
     "email": "shane.osbourne8@gmail.com"
