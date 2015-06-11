@@ -39,7 +39,9 @@ function RespModifier (opts) {
         res._respModifier = true;
 
         var writeHead = res.writeHead;
+        var runPatches = true;
         var write = res.write;
+        var count = 0;
         var end = res.end;
         var singlerules = utils.isWhiteListedForSingle(req.url, respMod.opts.rules);
         var withoutSingle = respMod.opts.rules.filter(function (rule) {
@@ -84,27 +86,41 @@ function RespModifier (opts) {
             };
 
             res.inject = res.write = function (string, encoding) {
+
+                if (!runPatches) {
+                    return write.call(res, string, encoding);
+                }
+
                 if (string !== undefined) {
-                    var body = string instanceof Buffer ? string.toString(encoding) : string;
-                    if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
-                        if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
-                            var newString = utils.overwriteBody(rules, body);
-                            res.push(newString);
+                    if (string !== undefined) {
+                        var body = string instanceof Buffer ? string.toString(encoding) : string;
+                        // If this chunk must receive a snip, do so
+                        if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
+                            if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
+                                res.push(utils.overwriteBody(rules, body));
+                                return true;
+                            } // If in doubt, simply buffer the data for later inspection (on `end` function)
+                            else {
+                                res.push(body);
+                                return true;
+                            }
                         } else {
-                            res.push(body);
+                            restore();
+                            return write.call(res, string, encoding);
                         }
-                        return true;
-                    } else {
-                        restore();
-                        return write.call(res, string, encoding);
                     }
+                    return true;
                 }
                 return true;
             };
 
             res.writeHead = function () {
+                if (!runPatches) {
+                    return writeHead.apply(res, arguments);
+                }
+
                 var headers = arguments[arguments.length - 1];
-                if (headers && typeof headers === "object") {
+                if (typeof headers === "object") {
                     for (var name in headers) {
                         if (/content-length/i.test(name)) {
                             delete headers[name];
@@ -112,8 +128,7 @@ function RespModifier (opts) {
                     }
                 }
 
-                var header = res.getHeader("content-length");
-                if (header) {
+                if (res.getHeader("content-length")) {
                     res.removeHeader("content-length");
                 }
 
@@ -121,20 +136,23 @@ function RespModifier (opts) {
             };
 
             res.end = function (string, encoding) {
-
-                restore();
-
-                var result = res.inject(string, encoding);
-
-                if (!result) {
+                if (!runPatches) {
                     return end.call(res, string, encoding);
                 }
 
+                // If there are remaining bytes, save them as well
+                // Also, some implementations call "end" directly with all data.
+                res.inject(string);
+                runPatches = false;
+                // Check if our body is HTML, and if it does not already have the snippet.
+                if (utils.isHtml(res.data) && !utils.exists(res.data,  opts.regex) && !utils.snip(res.data)) {
+                    // Include, if necessary, replacing the entire res.data with the included snippet.
+                    res.data = utils.overwriteBody(rules, res.data);
+                }
                 if (res.data !== undefined && !res._header) {
                     res.setHeader("content-length", Buffer.byteLength(res.data, encoding));
                 }
-
-                res.end(res.data, encoding);
+                end.call(res, res.data, encoding);
             };
         }
     }
