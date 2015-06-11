@@ -43,7 +43,9 @@ function RespModifier (opts) {
         var write = res.write;
         var count = 0;
         var end = res.end;
+        res.rulesWritten = [];
         var singlerules = utils.isWhiteListedForSingle(req.url, respMod.opts.rules);
+
         var withoutSingle = respMod.opts.rules.filter(function (rule) {
             if (rule.paths) {
                 return false;
@@ -92,24 +94,21 @@ function RespModifier (opts) {
                 }
 
                 if (string !== undefined) {
-                    if (string !== undefined) {
-                        var body = string instanceof Buffer ? string.toString(encoding) : string;
-                        // If this chunk must receive a snip, do so
-                        if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
-                            if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
-                                res.push(utils.overwriteBody(rules, body));
-                                return true;
-                            } // If in doubt, simply buffer the data for later inspection (on `end` function)
-                            else {
-                                res.push(body);
-                                return true;
-                            }
-                        } else {
-                            restore();
-                            return write.call(res, string, encoding);
+                    var body = string instanceof Buffer ? string.toString(encoding) : string;
+                    // If this chunk must receive a snip, do so
+                    if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
+                        if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
+                            res.push(utils.overwriteBody(rules, body, res));
+                            return true;
+                        } // If in doubt, simply buffer the data for later inspection (on `end` function)
+                        else {
+                            res.push(body);
+                            return true;
                         }
+                    } else {
+                        restore();
+                        return write.call(res, string, encoding);
                     }
-                    return true;
                 }
                 return true;
             };
@@ -145,9 +144,9 @@ function RespModifier (opts) {
                 res.inject(string);
                 runPatches = false;
                 // Check if our body is HTML, and if it does not already have the snippet.
-                if (utils.isHtml(res.data) && !utils.exists(res.data,  opts.regex) && !utils.snip(res.data)) {
+                if (utils.isHtml(res.data) && !utils.snip(res.data)) {
                     // Include, if necessary, replacing the entire res.data with the included snippet.
-                    res.data = utils.overwriteBody(rules, res.data);
+                    res.data = utils.overwriteBody(rules, res.data, res);
                 }
                 if (res.data !== undefined && !res._header) {
                     res.setHeader("content-length", Buffer.byteLength(res.data, encoding));

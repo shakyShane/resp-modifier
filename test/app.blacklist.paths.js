@@ -51,13 +51,12 @@ if (!module.parent) {
 }
 
 describe("GET /templates/ignore-path.html", function () {
-    it("Always allows indexs ", function (done) {
+    it("Always allows indexes ", function (done) {
         request(app)
             .get("/")
             .set("Accept", "text/html")
             .expect(200)
             .end(function (err, res) {
-                console.log(res.text);
                 assert.include(res.text, "TEST");
                 done();
             });

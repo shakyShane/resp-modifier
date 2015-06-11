@@ -3,7 +3,14 @@ var assert = require("chai").assert;
 var request = require("supertest");
 var overwrite = require("../lib/utils").overwriteBody;
 
+
 describe("Controlling regex replacements", function () {
+    var res;
+    beforeEach(function () {
+        res = {
+            rulesWritten: []
+        };
+    });
     it("should allow simple string replacements", function () {
         var actual = overwrite([
             {
@@ -14,7 +21,7 @@ describe("Controlling regex replacements", function () {
                 match: "{greeting}",
                 replace: "Welcome to New York"
             }
-        ], "hello {name} - {greeting}");
+        ], "hello {name} - {greeting}", res);
 
         var expected = "hello shane - Welcome to New York";
 
@@ -32,7 +39,7 @@ describe("Controlling regex replacements", function () {
                     return arguments[1] + "min" + arguments[3];
                 }
             }
-        ], "<link href=\"assets/style.463463456.css\" />");
+        ], "<link href=\"assets/style.463463456.css\" />", res);
 
         var expected = "<link href=\"assets/style.min.css\" />";
 
@@ -54,7 +61,7 @@ describe("Controlling regex replacements", function () {
                 match: "https://assets-cdn.github.com/assets/github2/index-4190b0977b9e2166bf19e2cef0c628ba77d6deaf2dda51987b61c5f58e96e255.css",
                 replace: "/assets/core2.css"
             }
-        ], input);
+        ], input, res);
 
         assert.equal(actual, expected);
     });
@@ -74,7 +81,7 @@ describe("Controlling regex replacements", function () {
                 match: "https://assets-cdn.github.com/assets/github2/index-4190b0977b9e2166bf19e2cef0c628ba77d6deaf2dda51987b61c5f58e96e255.css",
                 replace: "/assets/core2.css"
             }
-        ], input);
+        ], input, res);
 
         assert.equal(actual, expected);
     });
