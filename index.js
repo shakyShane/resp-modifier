@@ -47,7 +47,7 @@ function RespModifier (opts) {
         var singlerules = utils.isWhiteListedForSingle(req.url, respMod.opts.rules);
 
         var withoutSingle = respMod.opts.rules.filter(function (rule) {
-            if (rule.paths) {
+            if (rule.paths && rule.paths.length) {
                 return false;
             }
             return true;
