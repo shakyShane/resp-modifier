@@ -87,7 +87,7 @@ function RespModifier (opts) {
                 res.data = (res.data || "") + chunk;
             };
 
-            res.inject = res.write = function (string, encoding) {
+            res.write = function (string, encoding) {
 
                 if (!runPatches) {
                     return write.call(res, string, encoding);
@@ -97,14 +97,7 @@ function RespModifier (opts) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
                     // If this chunk must receive a snip, do so
                     if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
-                        if (utils.exists(body, opts.regex) && !utils.snip(res.data)) {
-                            res.push(utils.overwriteBody(rules, body, res));
-                            return true;
-                        } // If in doubt, simply buffer the data for later inspection (on `end` function)
-                        else {
-                            res.push(body);
-                            return true;
-                        }
+                        res.push(body);
                     } else {
                         restore();
                         return write.call(res, string, encoding);
@@ -135,18 +128,26 @@ function RespModifier (opts) {
             };
 
             res.end = function (string, encoding) {
+
+                res.data = res.data || '';
+
+                if (typeof string === 'string') {
+                    res.data += string;
+                }
+
                 if (!runPatches) {
                     return end.call(res, string, encoding);
                 }
 
-                // If there are remaining bytes, save them as well
-                // Also, some implementations call "end" directly with all data.
-                res.inject(string);
-                runPatches = false;
-                // Check if our body is HTML, and if it does not already have the snippet.
-                if (utils.isHtml(res.data) && !utils.snip(res.data)) {
+                //// If there are remaining bytes, save them as well
+                //// Also, some implementations call "end" directly with all data.
+                //res.inject(string);
+                //runPatches = false;
+                //// Check if our body is HTML, and if it does not already have the snippet.
+                if (force || utils.isHtml(res.data) && !utils.snip(res.data)) {
                     // Include, if necessary, replacing the entire res.data with the included snippet.
                     res.data = utils.overwriteBody(rules, res.data, res);
+                    runPatches = false;
                 }
                 if (res.data !== undefined && !res._header) {
                     res.setHeader("content-length", Buffer.byteLength(res.data, encoding));
