@@ -135,6 +135,10 @@ function RespModifier (opts) {
                     res.data += string;
                 }
 
+                if (string instanceof Buffer) {
+                    res.data += string.toString();
+                }
+
                 if (!runPatches) {
                     return end.call(res, string, encoding);
                 }
