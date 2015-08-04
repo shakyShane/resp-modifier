@@ -143,14 +143,10 @@ function RespModifier (opts) {
                     return end.call(res, string, encoding);
                 }
 
-                //// If there are remaining bytes, save them as well
-                //// Also, some implementations call "end" directly with all data.
-                //res.inject(string);
-                //runPatches = false;
                 //// Check if our body is HTML, and if it does not already have the snippet.
                 if (force || utils.isHtml(res.data) && !utils.snip(res.data)) {
                     // Include, if necessary, replacing the entire res.data with the included snippet.
-                    res.data = utils.overwriteBody(rules, res.data, res);
+                    res.data = utils.overwriteBody(rules, res.data);
                     runPatches = false;
                 }
                 if (res.data !== undefined && !res._header) {
