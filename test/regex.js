@@ -1,7 +1,7 @@
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var overwrite = require("../lib/utils").overwriteBody;
+var overwrite = require("../lib/utils").applyRules;
 
 describe("Controlling regex replacements", function () {
     var res;
