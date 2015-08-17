@@ -82,7 +82,8 @@ function RespModifier (opts) {
         /**
          * Actually do the overwrite
          * @param {Array} rules
-         * @param {boolean} [force] - if true, will perform an overwrite even regardless of whether it's HTML or not.
+         * @param {Boolean} [force] - if true, will always attempt to perform
+         * an overwrite - regardless of whether it appears to be HTML or not
          */
         function modifyResponse(rules, force) {
 
@@ -106,7 +107,7 @@ function RespModifier (opts) {
 
                 if (string !== undefined) {
                     var body = string instanceof Buffer ? string.toString(encoding) : string;
-                    // If this chunk must receive a snip, do so
+                    // If this chunk appears to be valid, push onto the res.data stack
                     if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
                         res.push(body);
                     } else {
@@ -123,6 +124,7 @@ function RespModifier (opts) {
                 }
 
                 var headers = arguments[arguments.length - 1];
+
                 if (typeof headers === "object") {
                     for (var name in headers) {
                         if (/content-length/i.test(name)) {
