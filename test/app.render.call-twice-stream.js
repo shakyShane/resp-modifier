@@ -8,8 +8,8 @@ var matcher = "resp-mod-tested";
 // load liveReload script only in development mode
 if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("..");
-    app.use(livereload({
+    var respMod = require("..");
+    app.use(respMod({
         rules: [
             {
                 match: /resp-mod/,
@@ -22,7 +22,7 @@ if (app.get("env") === "development") {
     }));
 
     // live reload script
-    app.use(livereload({
+    app.use(respMod({
         port: 35731,
         ignore: [".hammel"]
     }));

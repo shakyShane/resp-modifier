@@ -7,9 +7,9 @@ var app = express();
 // run the tests
 var request = require("supertest");
 
-var livereload = require("..");
+var respMod = require("..");
 
-app.use(livereload({
+app.use(respMod({
     rules: [
         {
             match: /IGNORE/,
@@ -42,13 +42,6 @@ app.get("/", function (req, res) {
 app.get("/shane", function (req, res) {
     res.end(output);
 });
-
-// start the server
-if (!module.parent) {
-    var port = settings.webserver.port || 3000;
-    app.listen(port);
-    console.log("Express app started on port " + port);
-}
 
 describe("GET /templates/ignore-path.html", function () {
     it("Always allows indexes ", function (done) {

@@ -8,8 +8,8 @@ var matcher = "<b>thisString</b>";
 // load liveReload script only in development mode
 if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("../index.js");
-    app.use(livereload({
+    var respMod = require("../index.js");
+    app.use(respMod({
         rules: [
             {
                 match: /set_length/g,

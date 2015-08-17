@@ -5,8 +5,8 @@ var app = express();
 
 // load liveReload script only in development mode
 if (app.get("env") === "development") {
-    var livereload = require("..");
-    app.use(livereload());
+    var respMod = require("..");
+    app.use(respMod());
 }
 
 // load static content before routing takes place

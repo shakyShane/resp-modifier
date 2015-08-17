@@ -6,9 +6,9 @@ var app       = express();
 // run the tests
 var request = require("supertest");
 
-var livereload = require("..");
+var respMod = require("..");
 
-app.use(livereload({
+app.use(respMod({
     rules: [
         {
             match: /INCLUDE/,

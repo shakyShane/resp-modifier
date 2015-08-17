@@ -1,7 +1,7 @@
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
@@ -16,7 +16,7 @@ describe("Exposing and updating the blacklist", function () {
         // run the tests
         routes    = ["/templates/ignore-path.html", "/index.html", "/"];
 
-        lr = livereload.create({
+        lr = respMod.create({
             rules: [
                 {
                     match: /IGNORE/,

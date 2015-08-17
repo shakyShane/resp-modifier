@@ -1,7 +1,7 @@
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var input    = "<!doctype html>\n<html lang=\'en\'>\n<head>\n    <meta charset=\'UTF-8\'>\n    <title>Document</title>\n    <link rel=\'stylesheet\' href=\'http://example.com/css/core.css\'/>\n</head>\n<body>\n\n</body>\n</html>";
 var expected = "<!doctype html>\n<html lang=\'en\'>\n<head>\n    <meta charset=\'UTF-8\'>\n    <title>Document</title>\n    <link rel=\'stylesheet\' href=\'/assets/css/core.css\'/>\n</head>\n<body>\n\n</body>\n</html>";
@@ -14,7 +14,7 @@ describe("Can rewrite using simple string replacements", function () {
 
         app = express();
 
-        lr = livereload.create({
+        lr = respMod.create({
             rules: [
                 {
                     match: "http://example.com/css/core.css",
@@ -50,7 +50,7 @@ describe("Can avoid regex-like input by using strings", function () {
 
         app = express();
 
-        lr = livereload.create({
+        lr = respMod.create({
             rules: [
                 {
                     paths: ["/"],

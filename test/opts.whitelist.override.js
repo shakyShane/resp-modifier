@@ -2,7 +2,7 @@ var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
@@ -18,7 +18,7 @@ describe("White listing Overriding blacklist", function () {
         routes    = ["/templates/ignore-path.html", "/templates/path", "/"];
         whitelist = ["/templates/ignore-path.html", "/"];
 
-        app.use(livereload({
+        app.use(respMod({
             rules: [
                 {
                     match: /IGNORE/,

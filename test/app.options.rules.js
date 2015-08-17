@@ -10,9 +10,9 @@ var app = express();
 // load liveReload script only in development mode
 if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("..");
+    var respMod = require("..");
 
-    app.use(livereload({
+    app.use(respMod({
         rules: [
             {
                 match: /<\/body>/,

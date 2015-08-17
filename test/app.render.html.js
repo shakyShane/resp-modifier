@@ -6,8 +6,8 @@ var matched = false;
 // load liveReload script only in development mode
 if (app.get("env") === "development") {
     // live reload script
-    var livereload = require("..");
-    app.use(livereload({
+    var respMod = require("..");
+    app.use(respMod({
         rules: [
             {
                 match: /https\:\/\/web-vip\.selcobw\.com/g,

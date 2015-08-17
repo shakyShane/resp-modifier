@@ -1,7 +1,7 @@
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var output = "just some string";
 
@@ -16,7 +16,7 @@ describe("Exposing the regex that ignores file types based on ext", function () 
         // run the tests
         routes    = ["/js/app.js"];
 
-        lr = livereload.create({
+        lr = respMod.create({
             rules: [
                 {
                     match: "string",

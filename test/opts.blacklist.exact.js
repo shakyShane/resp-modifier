@@ -2,7 +2,7 @@ var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
@@ -17,7 +17,7 @@ describe("Black listing exact matches", function () {
         // run the tests
         routes   = ["/templates/ignore-path.html", "/", "/shane"];
 
-        app.use(livereload({
+        app.use(respMod({
             rules: [
                 {
                     match: /IGNORE/,

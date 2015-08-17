@@ -1,7 +1,7 @@
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
-var livereload = require("..");
+var respMod = require("..");
 
 var output = "jQuery.ajax({" +
     "url: paths.url" +
@@ -18,7 +18,7 @@ describe("Example of overwriting a JS file", function () {
         // run the tests
         routes = ["/js/app.js"];
 
-        lr = livereload.create({
+        lr = respMod.create({
             rules: [
                 {
                     paths: ["**/*.js"],
