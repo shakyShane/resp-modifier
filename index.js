@@ -6,11 +6,12 @@ var debug     = require("debug")('resp-mod');
 function RespModifier (opts) {
 
     // options
-    opts           = opts || {};
-    opts.blacklist = utils.toArray(opts.blacklist)   || [];
-    opts.whitelist = utils.toArray(opts.whitelist)   || [];
-    opts.rules     = opts.rules                      || [];
-    opts.ignore    = opts.ignore || opts.excludeList || utils.defaultIgnoreTypes;
+    opts               = opts || {};
+    opts.blacklist     = utils.toArray(opts.blacklist)     || [];
+    opts.whitelist     = utils.toArray(opts.whitelist)     || [];
+    opts.hostBlacklist = utils.toArray(opts.hostBlacklist) || [];
+    opts.rules         = opts.rules                        || [];
+    opts.ignore        = opts.ignore || opts.excludeList   || utils.defaultIgnoreTypes;
 
     // helper functions
     opts.regex = (function () {
@@ -53,6 +54,13 @@ function RespModifier (opts) {
             }
             return true;
         });
+
+        /**
+         * Exit early for blacklisted domains
+         */
+        if (respMod.opts.hostBlacklist.indexOf(req.headers.host) > -1) {
+            return next();
+        }
 
         if (singlerules.length) {
             modifyResponse(singlerules, true);
