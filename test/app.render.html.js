@@ -1,44 +1,29 @@
-var express = require("express");
+var express     = require("express");
 var serveStatic = require("serve-static");
-
-var app = express();
-var matched = false;
-// load liveReload script only in development mode
-if (app.get("env") === "development") {
-    // live reload script
-    var respMod = require("..");
-    app.use(respMod({
-        rules: [
-            {
-                match: /https\:\/\/web-vip\.selcobw\.com/g,
-                fn: function () {
-                    return "SHANE";
-                }
-            },
-            {
-                match: /<body[^>]*>/i,
-                fn: function (match) {
-                    return arguments[0] + "<<SHANE";
-                },
-                once: true
+var request     = require("supertest");
+var assert      = require("assert");
+var respMod     = require("..");
+var app         = express();
+var rules = respMod({
+    rules: [
+        {
+            match: /https\:\/\/web-vip\.selcobw\.com/g,
+            fn: function () {
+                return "SHANE";
             }
-        ]
-    }));
-}
+        },
+        {
+            match: /<body[^>]*>/i,
+            fn: function (match) {
+                return arguments[0] + "<<SHANE";
+            },
+            once: true
+        }
+    ]
+});
 
-// load static content before routing takes place
+app.use(rules);
 app.use(serveStatic(__dirname + "/fixtures"));
-
-// start the server
-if (!module.parent) {
-    var port = settings.webserver.port || 3000;
-    app.listen(port);
-    console.log("Express app started on port " + port);
-}
-
-// run the tests
-var request = require("supertest");
-var assert = require("assert");
 
 describe("GET /dummies", function () {
     it("respond with inserted script", function (done) {

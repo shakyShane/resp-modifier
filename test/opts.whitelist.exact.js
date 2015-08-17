@@ -1,9 +1,7 @@
-var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");
 var respMod = require("..");
-
 var output = "<!doctype html><html lang=\"en-US\"><head><meta charset=\"UTF-8\"><title></title></head><body>IGNORE</body></html>";
 
 describe("White listing exact matches", function () {

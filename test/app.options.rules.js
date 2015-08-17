@@ -1,40 +1,33 @@
 var express = require("express");
 var fs = require("fs");
 var serveStatic = require("serve-static");
-
+var respMod = require("..");
+var request = require("supertest");
+var assert = require("assert");
 var app = express();
 
-//app.use(express.bodyParser());
-//app.use(express.methodOverride());
-
-// load liveReload script only in development mode
-if (app.get("env") === "development") {
-    // live reload script
-    var respMod = require("..");
-
-    app.use(respMod({
-        rules: [
-            {
-                match: /<\/body>/,
-                fn: function buume(w) {
-                  return "\n\n joggeli buume \n\n" + w;
-                }
-            },
-            {
-                match: /<\/head>/,
-                fn: function pfluume(w) {
-                  return "\n\n het gern pfluume \n\n" + w;
-                }
-            },
-            {
-                match: new RegExp("0.0.0.0:8000", "g"),
-                fn: function () {
-                    return "19.16.565.67:3002";
-                }
+app.use(respMod({
+    rules: [
+        {
+            match: /<\/body>/,
+            fn: function buume(w) {
+                return "\n\n joggeli buume \n\n" + w;
             }
-        ]
-    }));
-}
+        },
+        {
+            match: /<\/head>/,
+            fn: function pfluume(w) {
+                return "\n\n het gern pfluume \n\n" + w;
+            }
+        },
+        {
+            match: new RegExp("0.0.0.0:8000", "g"),
+            fn: function () {
+                return "19.16.565.67:3002";
+            }
+        }
+    ]
+}));
 
 // load static content before routing takes place
 app.use(serveStatic(__dirname + "/fixtures"));
@@ -62,17 +55,6 @@ app.get("/url-large", function (req, res) {
     var html = fs.readFileSync(__dirname + "/fixtures/large-file.html", "UTF-8");
     res.send(html);
 });
-
-// start the server
-if (!module.parent) {
-    var port = settings.webserver.port || 3000;
-    app.listen(port);
-    console.log("Express app started on port " + port);
-}
-
-// run the tests
-var request = require("supertest");
-var assert = require("assert");
 
 describe("Rules: ", function () {
 

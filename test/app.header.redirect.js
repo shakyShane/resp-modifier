@@ -1,13 +1,10 @@
 var express = require("express");
 var serveStatic = require("serve-static");
-
+var respMod = require("..");
+var request = require("supertest");
 var app = express();
 
-// load liveReload script only in development mode
-if (app.get("env") === "development") {
-    var respMod = require("..");
-    app.use(respMod());
-}
+app.use(respMod());
 
 // load static content before routing takes place
 app.use(serveStatic(__dirname + "/fixtures"));
@@ -26,16 +23,6 @@ app.get("/redirect_to_favicon3", function (req, res) {
     res.writeHead(302);
     res.end("just use nodejs method, donot call express api");
 });
-
-// start the server
-if (!module.parent) {
-    var port = settings.webserver.port || 3000;
-    app.listen(port);
-    console.log("Express app started on port " + port);
-}
-
-// run the tests
-var request = require("supertest");
 
 describe("GET /redirect_to_favicon", function () {
     it("respond with Location header", function (done) {

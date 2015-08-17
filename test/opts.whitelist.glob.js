@@ -1,4 +1,3 @@
-var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
 var request = require("supertest");

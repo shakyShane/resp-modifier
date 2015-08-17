@@ -1,27 +1,23 @@
 var express = require("express");
 var serveStatic = require("serve-static");
-
+var respMod = require("../index.js");
 var app = express();
+var request = require("supertest");
+var assert = require("assert");
 
 var matcher = "<b>thisString</b>";
 
-// load liveReload script only in development mode
-if (app.get("env") === "development") {
-    // live reload script
-    var respMod = require("../index.js");
-    app.use(respMod({
-        rules: [
-            {
-                match: /set_length/g,
-                fn: function () {
-                    return matcher;
-                }
+app.use(respMod({
+    rules: [
+        {
+            match: /set_length/g,
+            fn: function () {
+                return matcher;
             }
-        ],
-        port: 35729
-    }));
-}
-
+        }
+    ],
+    port: 35729
+}));
 // load static content before routing takes place
 app.use(serveStatic(__dirname + "/fixtures"));
 
@@ -43,17 +39,6 @@ app.get("/set_length2", function (req, res) {
     });
     res.end(html);
 });
-
-// start the server
-if (!module.parent) {
-    var port = settings.webserver.port || 3000;
-    app.listen(port);
-    console.log("Express app started on port " + port);
-}
-
-// run the tests
-var request = require("supertest");
-var assert = require("assert");
 
 function hasText(html) {
     return (~html.indexOf(matcher));

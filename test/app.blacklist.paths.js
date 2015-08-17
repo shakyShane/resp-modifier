@@ -1,13 +1,10 @@
 var multiline = require("multiline");
 var express = require("express");
 var assert = require("chai").assert;
+var request = require("supertest");
+var respMod = require("..");
 
 var app = express();
-
-// run the tests
-var request = require("supertest");
-
-var respMod = require("..");
 
 app.use(respMod({
     rules: [

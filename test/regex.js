@@ -3,7 +3,6 @@ var assert = require("chai").assert;
 var request = require("supertest");
 var overwrite = require("../lib/utils").overwriteBody;
 
-
 describe("Controlling regex replacements", function () {
     var res;
     beforeEach(function () {
