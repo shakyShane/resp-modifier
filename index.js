@@ -1,7 +1,7 @@
 "use strict";
 
 var utils     = require("./lib/utils");
-var debug     = require("debug")('resp-mod');
+var debug     = require("debug")("resp-mod");
 
 function RespModifier (opts) {
 
@@ -35,10 +35,10 @@ function RespModifier (opts) {
     function respModifierMiddleware(req, res, next) {
 
         if (res._respModifier) {
-            debug('Reject req', req.url);
+            debug("Reject req", req.url);
             return next();
         }
-        debug('Accept req', req.url);
+        debug("Accept req", req.url);
 
         res._respModifier = true;
 
@@ -69,7 +69,7 @@ function RespModifier (opts) {
                 modifyResponse(withoutSingle, true);
             } else {
                 if (!utils.hasAcceptHeaders(req) || utils.inBlackList(req.url, respMod.opts)) {
-                    debug('Black listed or no text/html headers', req.url);
+                    debug("Black listed or no text/html headers", req.url);
                     return next();
                 } else {
                     modifyResponse(withoutSingle);
@@ -142,9 +142,9 @@ function RespModifier (opts) {
 
             res.end = function (string, encoding) {
 
-                res.data = res.data || '';
+                res.data = res.data || "";
 
-                if (typeof string === 'string') {
+                if (typeof string === "string") {
                     res.data += string;
                 }
 

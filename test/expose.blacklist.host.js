@@ -30,7 +30,7 @@ describe("Exposing and updating the blacklisted hosts", function () {
 
         var server = app.listen();
         port = server.address().port;
-        host = ['127.0.0.1', port].join(':');
+        host = ["127.0.0.1", port].join(":");
 
         expected = output.replace("IGNORE", "TEST");
 
@@ -41,7 +41,7 @@ describe("Exposing and updating the blacklisted hosts", function () {
         });
     });
     it("should initially allow all routes, but then ban one when the host has been added to the blacklist", function (done) {
-        request(['http://', host].join(''))
+        request(["http://", host].join(""))
             .get(routes[0])
             .set("Accept", "text/html")
             .end(function (err, res) {
@@ -50,7 +50,7 @@ describe("Exposing and updating the blacklisted hosts", function () {
 
                 lr.opts.hostBlacklist.push(host);
 
-                request(['http://', host].join(''))
+                request(["http://", host].join(""))
                     .get(routes[0])
                     .set("Accept", "text/html")
                     .end(function (err, res) {
