@@ -33,6 +33,7 @@
     "express": "^4.13.3",
     "jshint": "^2.6.0",
     "mocha": "^2.1.0",
+    "multiline": "^1.0.2",
     "serve-static": "^1.8.1",
     "supertest": "^1.0.1"
   },
