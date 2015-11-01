@@ -11,7 +11,7 @@ app.use(respMod({
     rules: [
         {
             match: /resp-mod/,
-            fn: function (w) {
+            fn: function (req, res, w) {
                 return w + "-tested";
             }
         }

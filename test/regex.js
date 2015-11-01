@@ -35,7 +35,7 @@ describe("Controlling regex replacements", function () {
             {
                 match: /(style\.)(.+?)(\.css)/,
                 fn: function () {
-                    return arguments[1] + "min" + arguments[3];
+                    return arguments[3] + "min" + arguments[5];
                 }
             }
         ], "<link href=\"assets/style.463463456.css\" />", res);
