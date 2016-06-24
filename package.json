@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "debug": "^2.2.0",
-    "minimatch": "^2.0.1"
+    "minimatch": "^3.0.2"
   },
   "devDependencies": {
     "browser-sync": "^2.8.2",
