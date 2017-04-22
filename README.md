@@ -4,7 +4,7 @@ All the good parts from [connect-livereload](https://github.com/intesso/connect-
 the livereload specific bits & with multiple replacements added.
 
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Gulp](http://gulpjs.com/).
+In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using `npm test`.
 
 ## Release History
 _(Nothing yet)_
