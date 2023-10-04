@@ -95,8 +95,17 @@ function RespModifier (opts) {
                 res.end = end;
             }
 
+            var chunks = [];
+
             res.push = function (chunk) {
-                res.data = (res.data || "") + chunk;
+                // Back-compat is somebody was calling push from outside with a string
+                if(!(chunk instanceof Buffer)) {
+                    chunk = Buffer.from(chunk, "utf8");
+                }
+
+                // res.data can contain incorrectly decoded split multi-byte codepoints
+                res.data = (res.data || "") + chunk.toString("utf8");
+                chunks.push(chunk);
             };
 
             res.write = function (string, encoding) {
@@ -106,10 +115,11 @@ function RespModifier (opts) {
                 }
 
                 if (string !== undefined) {
-                    var body = string instanceof Buffer ? string.toString(encoding) : string;
+                    // Convert arguments into a Buffer
+                    var chunk = !(string instanceof Buffer) ? Buffer.from(string, encoding) : string;
                     // If this chunk appears to be valid, push onto the res.data stack
-                    if (force || (utils.isHtml(body) || utils.isHtml(res.data))) {
-                        res.push(body);
+                    if (force || (utils.isHtml(chunk.toString("utf8")) || utils.isHtml(res.data))) {
+                        res.push(chunk);
                     } else {
                         restore();
                         return write.call(res, string, encoding);
@@ -142,19 +152,18 @@ function RespModifier (opts) {
 
             res.end = function (string, encoding) {
 
-                res.data = res.data || "";
-
-                if (typeof string === "string") {
-                    res.data += string;
-                }
-
-                if (string instanceof Buffer) {
-                    res.data += string.toString();
-                }
-
                 if (!runPatches) {
                     return end.call(res, string, encoding);
                 }
+
+                if (typeof string === "string") {
+                    res.push(Buffer.from(string, encoding));
+                } else if (string instanceof Buffer) {
+                    res.push(string);
+                }
+
+                // Reconstruct res.data from buffers stored in chunks, so it is decoded as a valid Unicode string
+                res.data = Buffer.concat(chunks).toString("utf8");
 
                 // Check if our body is HTML, and if it does not already have the snippet.
                 if (force || utils.isHtml(res.data) && !utils.snip(res.data)) {
@@ -163,9 +172,9 @@ function RespModifier (opts) {
                     runPatches = false;
                 }
                 if (res.data !== undefined && !res._header) {
-                    res.setHeader("content-length", Buffer.byteLength(res.data, encoding));
+                    res.setHeader("content-length", Buffer.byteLength(res.data, "utf8"));
                 }
-                end.call(res, res.data, encoding);
+                end.call(res, res.data, "utf8");
             };
         }
     }
